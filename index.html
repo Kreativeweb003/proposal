@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A question for you</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{
+  --bg:#f9dfe8; --bg2:#f3c4d6; --ink:#4a1230; --yes:#e8336d; --yes-ink:#fff; --no:#fff; --no-ink:#4a1230;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#2a0c1d; --bg2:#431230; --ink:#ffe3ee; --yes:#ff4f86; --no:#4a1a36; --no-ink:#ffe3ee; }
+}
+:root[data-theme="dark"]{ --bg:#2a0c1d; --bg2:#431230; --ink:#ffe3ee; --yes:#ff4f86; --no:#4a1a36; --no-ink:#ffe3ee; }
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{
+  background:radial-gradient(circle at 50% 30%,var(--bg2),var(--bg) 70%);
+  color:var(--ink); font-family:"Nunito",system-ui,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden; text-align:center;
+}
+main{padding:24px;max-width:480px;width:100%}
+.emoji{font-size:84px;line-height:1;display:block;transition:transform .3s}
+h1{font-family:"Caveat",cursive,"Segoe Script",serif;font-size:clamp(44px,12vw,68px);line-height:1.05;margin:16px 0 8px;font-weight:700}
+p{margin:0 auto;font-size:18px;max-width:34ch;line-height:1.5;min-height:3em}
+.btns{position:relative;display:flex;gap:28px;justify-content:center;align-items:center;margin-top:40px;height:64px}
+button{font:inherit;font-weight:800;font-size:20px;border:0;border-radius:999px;padding:16px 36px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+#yes{background:var(--yes);color:var(--yes-ink);position:relative;z-index:2;transition:transform .35s cubic-bezier(.3,1.5,.5,1);box-shadow:0 8px 24px rgba(232,51,109,.35)}
+#no{background:var(--no);color:var(--no-ink);position:relative;z-index:1;box-shadow:0 4px 14px rgba(74,18,48,.18)}
+#yes.full{position:fixed;inset:0;z-index:20;border-radius:0;transform:none;font-size:clamp(48px,16vw,120px);font-family:"Caveat",cursive,serif;transition:none}
+.win{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;flex-direction:column;background:var(--bg);padding:24px}
+.win.show{display:flex}
+.win h2{font-family:"Caveat",cursive,serif;font-size:clamp(48px,13vw,84px);margin:12px 0}
+.win p{min-height:0}
+.heart{position:fixed;bottom:-40px;font-size:28px;animation:rise linear forwards;pointer-events:none;z-index:40}
+@keyframes rise{to{transform:translateY(-115vh) rotate(30deg);opacity:.2}}
+@media (prefers-reduced-motion:reduce){ .heart{animation-duration:.01s!important} #yes{transition:none} }
+</style>
+</head>
+<body>
+<main id="ask">
+  <span class="emoji" id="face">🥺</span>
+  <h1 id="title">Tolani will you be my Girlfriend for the 100th time 🥰 ? </h1>
+  <p id="msg">I would love to be your one and only </p>
+  <div class="btns">
+    <button id="yes">Yes 💗</button>
+    <button id="no">No</button>
+  </div>
+</main>
+
+<section class="win" id="win" aria-live="polite">
+  <span class="emoji">🥰</span>
+  <h2 id="winTitle">You said yes!</h2>
+  <p>I Love you too my Baby </p>
+</section>
+
+<script>
+(function(){
+  var name = "";
+  try { name = new URLSearchParams(location.search).get("to") || ""; } catch(e){}
+  if (name){
+    document.getElementById("title").textContent = name + ", will you go out with me?";
+    document.getElementById("winTitle").textContent = name + ", you said yes!";
+  }
+  var yes = document.getElementById("yes"), no = document.getElementById("no");
+  var msg = document.getElementById("msg"), face = document.getElementById("face");
+  var lines = [
+    "Are you sure? Think about it again.",
+    "Please? I’ll even pick the restaurant.",
+    "That button looks lonely. So do I.",
+    "Look, Yes is getting bigger. It really wants you.",
+    "Almost no room left for No…",
+    "Okay, the only button left is Yes."
+  ];
+  var faces = ["😢","😭","🥹","😳","🙈","💘"];
+  var noText = ["No","Are you sure?","Really?","Think again","Last chance","…"];
+  var clicks = 0;
+
+  function grow(){
+    clicks++;
+    var i = Math.min(clicks - 1, lines.length - 1);
+    msg.textContent = lines[i];
+    face.textContent = faces[i];
+    no.textContent = noText[Math.min(clicks, noText.length - 1)];
+    if (clicks >= 7){
+      yes.classList.add("full");
+      yes.style.transform = "";
+      return;
+    }
+    yes.style.transform = "scale(" + (1 + clicks * 0.55) + ")";
+    yes.style.marginRight = (clicks * 18) + "px";
+  }
+
+  no.addEventListener("click", grow);
+
+  yes.addEventListener("click", function(){
+    document.getElementById("win").classList.add("show");
+    var icons = ["💗","💖","💕","🌹","💘"];
+    for (var i = 0; i < 40; i++){
+      var h = document.createElement("span");
+      h.className = "heart";
+      h.textContent = icons[i % icons.length];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.animationDuration = (3 + Math.random() * 3) + "s";
+      h.style.animationDelay = (Math.random() * 1.5) + "s";
+      document.body.appendChild(h);
+    }
+  });
+})();
+</script>
+</body>
+</html>
